@@ -17,6 +17,7 @@
 
 package com.nfragiskatos.android.devbyteviewer.network
 
+import com.nfragiskatos.android.devbyteviewer.database.DatabaseVideo
 import com.nfragiskatos.android.devbyteviewer.domain.Video
 import com.squareup.moshi.JsonClass
 
@@ -62,4 +63,19 @@ fun NetworkVideoContainer.asDomainModel(): List<Video> {
                 updated = it.updated,
                 thumbnail = it.thumbnail)
     }
+}
+
+/**
+ * Extension function to convert from {NetworkVideoContainer} to {DatabaseVideo}
+ */
+fun NetworkVideoContainer.asDatabaseModel(): Array<DatabaseVideo> {
+    return videos.map {
+        DatabaseVideo(
+                title = it.title,
+                description = it.description,
+                url = it.url,
+                updated = it.updated,
+                thumbnail = it.thumbnail
+        )
+    }.toTypedArray()
 }
