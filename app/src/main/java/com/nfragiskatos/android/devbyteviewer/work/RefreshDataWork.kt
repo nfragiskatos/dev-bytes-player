@@ -16,3 +16,28 @@
  */
 
 package com.nfragiskatos.android.devbyteviewer.work
+
+import android.content.Context
+import androidx.work.CoroutineWorker
+import androidx.work.WorkerParameters
+import com.nfragiskatos.android.devbyteviewer.database.VideosDatabase
+import com.nfragiskatos.android.devbyteviewer.database.getDatabase
+import com.nfragiskatos.android.devbyteviewer.repository.VideosRepository
+import retrofit2.HttpException
+
+class RefreshDataWork(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
+    override suspend fun doWork(): Result {
+        val database: VideosDatabase = getDatabase(applicationContext)
+        val repository = VideosRepository(database)
+
+        repository.refreshVideos()
+
+        return try {
+            repository.refreshVideos()
+            Result.success()
+        } catch (exception: HttpException) {
+            Result.retry()
+        }
+    }
+
+}
