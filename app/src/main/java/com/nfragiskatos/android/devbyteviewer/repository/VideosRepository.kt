@@ -17,7 +17,11 @@
 
 package com.nfragiskatos.android.devbyteviewer.repository
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Transformations
 import com.nfragiskatos.android.devbyteviewer.database.VideosDatabase
+import com.nfragiskatos.android.devbyteviewer.database.asDomainModel
+import com.nfragiskatos.android.devbyteviewer.domain.Video
 import com.nfragiskatos.android.devbyteviewer.network.Network
 import com.nfragiskatos.android.devbyteviewer.network.asDatabaseModel
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +32,20 @@ import kotlinx.coroutines.withContext
  */
 class VideosRepository(private val database: VideosDatabase) {
 
+    /**
+     * Playlist of videos to be shown on the screen.
+     */
+    val videos: LiveData<List<Video>> = Transformations.map(database.videoDao.getVideos()) {
+        it.asDomainModel()
+    }
+
+
+    /**
+     * Refresh the videos stored in the offline cache.
+     *
+     * Use the IO dispatcher to ensure the disk write to the database happens without blocking. Makes it safe to call from any
+     * thread, even Main.
+     */
     suspend fun refreshVideos() {
         withContext(Dispatchers.IO) {
             val playlist = Network.devbytes.getPlaylist().await()
