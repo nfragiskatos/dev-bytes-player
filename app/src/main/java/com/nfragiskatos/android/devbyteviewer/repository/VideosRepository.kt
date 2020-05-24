@@ -16,3 +16,22 @@
  */
 
 package com.nfragiskatos.android.devbyteviewer.repository
+
+import com.nfragiskatos.android.devbyteviewer.database.VideosDatabase
+import com.nfragiskatos.android.devbyteviewer.network.Network
+import com.nfragiskatos.android.devbyteviewer.network.asDatabaseModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
+/**
+ * Repository for fetching devbyte videos from the network and storing them in the cache.
+ */
+class VideosRepository(private val database: VideosDatabase) {
+
+    suspend fun refreshVideos() {
+        withContext(Dispatchers.IO) {
+            val playlist = Network.devbytes.getPlaylist().await()
+            database.videoDao.insertAll(*playlist.asDatabaseModel())
+        }
+    }
+}
